@@ -291,11 +291,11 @@ Publish and submit:
 | # | What | Why |
 |---|------|-----|
 | V1 | Run a real PDF through `/primeCut/ingest` and `/results`; confirm chunk and chunkset indices line up, how placeholders appear in text, and that the 4.5 loader settings insert chunksets unsplit into Qdrant | D6 rests on it |
-| V2 | Credential test (`GET /docs?limit=1`) with a project key, an account key plus Project ID, and an account key without Project ID on an account with and without a default project; a PrimeCut key against `GET /docs` (expect a 4xx); whether `X-Project-ID` is harmless on `/jobs/{id}/status`; which PrimeCut route serves as its credential test | D3, README wording |
+| V2 | Credential test (`GET /docs?limit=1`) with a project key, an account key plus Project ID, and an account key without Project ID on an account with and without a default project; a PrimeCut key against `GET /docs` (expect a 4xx); whether `X-Project-ID` is harmless on `/jobs/{id}/status`; which PrimeCut route serves as its credential test | D3, README wording. **Done 2026-10-26 for the account key** (see `n8n-nodes-index4ai/docs/TESTING.md`); project key, PrimeCut key and the PrimeCut test route still open |
 | V3 | Fire `X-Completion` at a Wait node's resume URL; record method and payload | Decides whether a Completion Webhook option can be added after v1 |
 | V4 | Confirm the octet-stream body limit for ingest and state it in the parameter description | User-facing limit |
-| V5 | On n8n 2.x (via `npm run dev`), confirm the index4.ai tool appears in the AI Agent picker without any environment variable; record the minimum n8n version for the README | D7; older versions needed `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`, which the current env var docs no longer list |
-| V6 | Confirm how n8n derives a community tool's description (node description, or operation action) and adjust the description strings | D7 wording |
+| V5 | On n8n 2.x (via `npm run dev`), confirm the index4.ai tool appears in the AI Agent picker without any environment variable; record the minimum n8n version for the README | D7. **Done 2026-10-26 on n8n 3.x (`n8nio/n8n:latest`)**: "index4.ai Tool" appears, no environment variable set |
+| V6 | Confirm how n8n derives a community tool's description (node description, or operation action) and adjust the description strings | D7 wording. **Done 2026-10-26**: the tool view shows "Tool Description: Set Automatically" with the node description; no change needed |
 
 ## 9. Risks
 
