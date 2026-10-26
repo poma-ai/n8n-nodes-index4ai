@@ -1,0 +1,65 @@
+{
+  "name": "index4.ai: ingest a file from binary data",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "name": "Download file",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "ingest",
+        "source": "binary",
+        "binaryPropertyName": "data",
+        "wait": true,
+        "timeout": 600,
+        "ingestOptions": {
+          "attributes": "{\"source\": \"n8n_example\"}"
+        }
+      },
+      "name": "Ingest document",
+      "type": "n8n-nodes-index4ai.index4Ai",
+      "typeVersion": 1,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Ingest a file from binary data\n\nAny node that outputs a file works as the source: HTTP Request (response format File), Google Drive download, an email attachment, a Read/Write Files from Disk node.\n\n1. Add your **index4.ai API** credential to the index4.ai node.\n2. Keep **Input Binary Field** equal to the binary field name of the previous node (`data` here).\n3. Execute. The file name and type are taken from the binary data; the node waits until the document is searchable.",
+        "height": 260,
+        "width": 460
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -300]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [[{ "node": "Download file", "type": "main", "index": 0 }]]
+    },
+    "Download file": {
+      "main": [[{ "node": "Ingest document", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

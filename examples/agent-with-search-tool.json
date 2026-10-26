@@ -1,0 +1,70 @@
+{
+  "name": "index4.ai: chat agent with the search tool",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You answer questions using the index4.ai search tool. Always search before answering, and cite the document IDs and pages the context block gives you."
+        }
+      },
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Chat model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [160, 220]
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "operation": "search",
+        "query": "={{ $fromAI('query', 'The question to search the indexed documents for', 'string') }}",
+        "resultFormat": "promptReady",
+        "searchOptions": {}
+      },
+      "name": "index4.ai Tool",
+      "type": "n8n-nodes-index4ai.index4AiTool",
+      "typeVersion": 1,
+      "position": [400, 220]
+    },
+    {
+      "parameters": {
+        "content": "## Chat agent with index4.ai search\n\n1. Add your **index4.ai API** credential to the index4.ai Tool.\n2. Replace the chat model with the one you use and add its credential.\n3. Open the chat and ask a question about your indexed documents. The agent calls the Search tool with the question and receives a prompt-ready context block with document IDs, pages and citation URLs.",
+        "height": 240,
+        "width": 460
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -280]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
+    },
+    "Chat model": {
+      "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "index4.ai Tool": {
+      "ai_tool": [[{ "node": "AI Agent", "type": "ai_tool", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}

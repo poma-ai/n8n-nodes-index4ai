@@ -44,9 +44,15 @@ Get, Get Many and Structured Results carry an **Output** setting: Simplified (th
 
 ### Example workflows
 
-- **Index a shared folder:** Google Drive Trigger (file created) → Google Drive (download) → index4.ai, Document > Ingest from the binary field, Wait for Indexing on.
-- **Ask questions in chat:** Chat Trigger → AI Agent with index4.ai attached as a tool (Search, Prompt-Ready Text) and a chat model of your choice.
-- **Clean-up:** Schedule Trigger → index4.ai Document > Get Many (Return All) → Filter on `ingested_at` → index4.ai Document > Delete.
+Importable workflows live in [`examples/`](examples). In n8n, open a workflow, choose **Import from File** from the menu, pick the JSON file, then add your credential to the index4.ai nodes.
+
+| File | What it shows |
+|------|---------------|
+| [`ingest-url-then-search.json`](examples/ingest-url-then-search.json) | Ingest a document by URL, wait for indexing, then Search in Document using the returned `docId` |
+| [`ingest-binary-file.json`](examples/ingest-binary-file.json) | Download a file with HTTP Request and ingest it from the binary field, with an attribute set |
+| [`agent-with-search-tool.json`](examples/agent-with-search-tool.json) | Chat Trigger → AI Agent with index4.ai attached as a tool; the model fills the Query via `$fromAI` |
+
+Other shapes that work the same way: Google Drive Trigger → Google Drive download → Ingest from binary; Schedule Trigger → Get Many → Filter on `ingested_at` → Delete.
 
 ## Using the node as an AI Agent tool
 

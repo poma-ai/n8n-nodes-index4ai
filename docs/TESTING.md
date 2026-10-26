@@ -30,10 +30,16 @@ Setup: `n8nio/n8n:latest` (n8n 3.x) with the built package mounted as a custom e
 | AI Agent tool picker (V5) | "index4.ai Tool" listed, no environment variable needed on n8n 3.x |
 | Tool description (V6) | n8n shows "Tool Description: Set Automatically" using the node description; Query carries the "let the model fill" control |
 
+### Example workflows (same day, same instance)
+
+`examples/ingest-binary-file.json` imported via **Import from URL** and executed: HTTP Request downloaded `dummy.pdf` (13.3 kB, `application/pdf`), Ingest read it from the `data` binary field with `Attributes` `{"source": "n8n_example"}`, waited, and returned `status: done`. `GET /docs/{docId}` showed `attributes: {"source": "n8n_example"}`; the document was then deleted and answers 404.
+
+Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-compose.yml`): n8n registers the node as `CUSTOM.index4Ai`, so the examples' `n8n-nodes-index4ai.index4Ai` type must be replaced with `CUSTOM.index4Ai` before importing. A package installed through Settings > Community Nodes uses the type as shipped. "Import from URL" is fetched by the n8n backend, not the browser, so the URL must be reachable from inside the container.
+
 ### Not yet covered
 
-- Binary-file ingest from a previous node (only URL ingest was run)
 - Get, Get Many and the Output modes Raw and Selected Fields in the UI
 - Job > Get Status in the UI
-- A real agent run with a chat model attached
+- A real agent run with a chat model attached (`examples/agent-with-search-tool.json` imports but was not executed)
+- `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
 - A project API key (only the account key was used)

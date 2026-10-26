@@ -1,0 +1,65 @@
+{
+  "name": "index4.ai: ingest a URL, then search the document",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "operation": "ingest",
+        "source": "url",
+        "url": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        "wait": true,
+        "timeout": 600,
+        "ingestOptions": {}
+      },
+      "name": "Ingest document",
+      "type": "n8n-nodes-index4ai.index4Ai",
+      "typeVersion": 1,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "operation": "searchInDoc",
+        "document": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.docId }}"
+        },
+        "query": "What does this document say?",
+        "resultFormat": "promptReady",
+        "searchOptions": {}
+      },
+      "name": "Search in document",
+      "type": "n8n-nodes-index4ai.index4Ai",
+      "typeVersion": 1,
+      "position": [480, 0]
+    },
+    {
+      "parameters": {
+        "content": "## Ingest a URL, then search it\n\n1. Add your **index4.ai API** credential to both index4.ai nodes.\n2. Replace the URL with a document index4.ai can fetch.\n3. Execute. Ingest waits until the document is indexed, then the search runs against that document only, using the returned `docId`.",
+        "height": 220,
+        "width": 420
+      },
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [0, -260]
+    }
+  ],
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [[{ "node": "Ingest document", "type": "main", "index": 0 }]]
+    },
+    "Ingest document": {
+      "main": [[{ "node": "Search in document", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" }
+}
