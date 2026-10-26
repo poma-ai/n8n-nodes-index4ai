@@ -1,0 +1,57 @@
+{
+  "name": "n8n-nodes-index4ai",
+  "version": "0.1.0",
+  "description": "n8n community node for index4.ai: ingest documents and search them for RAG and AI agents",
+  "license": "MIT",
+  "homepage": "https://index4.ai",
+  "keywords": [
+    "n8n-community-node-package",
+    "index4ai",
+    "rag",
+    "retrieval",
+    "search",
+    "vector store",
+    "documents"
+  ],
+  "author": {
+    "name": "POMA AI",
+    "email": "rb@poma-ai.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/poma-ai/n8n-nodes-index4ai.git"
+  },
+  "scripts": {
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
+  },
+  "files": [
+    "dist",
+    "LICENSE.md"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/Index4AiApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/Index4Ai/Index4Ai.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "^0.53.4",
+    "eslint": "9.32.0",
+    "prettier": "3.6.2",
+    "release-it": "^21.1.0",
+    "typescript": "5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
+}

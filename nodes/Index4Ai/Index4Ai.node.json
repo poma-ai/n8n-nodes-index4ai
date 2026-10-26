@@ -1,0 +1,45 @@
+{
+	"node": "n8n-nodes-index4ai.index4Ai",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Data & Storage", "Development"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/poma-ai/n8n-nodes-index4ai#credentials"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/poma-ai/n8n-nodes-index4ai#readme"
+			}
+		]
+	},
+	"alias": [
+		"index4ai",
+		"index4",
+		"poma",
+		"rag",
+		"retrieval",
+		"retrieval augmented generation",
+		"search",
+		"semantic search",
+		"hybrid search",
+		"vector store",
+		"vector search",
+		"knowledge base",
+		"document q&a",
+		"chat with documents",
+		"ingest",
+		"index",
+		"indexing",
+		"document",
+		"pdf",
+		"chunk",
+		"chunking",
+		"embeddings",
+		"agent tool",
+		"ai agent",
+		"context"
+	]
+}
