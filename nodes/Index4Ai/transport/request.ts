@@ -145,6 +145,13 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 	const suffix = detail ? `: ${detail}` : '';
 	switch (code) {
 		case 400:
+			if (reason === 'no_default_project') {
+				return {
+					message: 'No project is selected for this account API key',
+					description:
+						"Enter the 'Project ID' in the credential, or set a default index4.ai project for the account in the console",
+				};
+			}
 			return {
 				message: `The request was rejected${suffix}`,
 				description: 'Check the file name, URL and options',
@@ -153,7 +160,7 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 			return {
 				message: 'The API key was rejected',
 				description:
-					'Check the key in the credential, and that it is a project key for an index4.ai project',
+					'Check the key in the credential, and that its project (or the Project ID) has the index4.ai product',
 			};
 		case 402:
 			return {
@@ -174,6 +181,12 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 				description: 'Check the ID, and that it belongs to this project',
 			};
 		case 409:
+			if (reason === 'project_id_conflict') {
+				return {
+					message: "The 'Project ID' in the credential does not match the project key's project",
+					description: "Clear 'Project ID' when using a project key, or use an account key",
+				};
+			}
 			return {
 				message: 'The job ended without a recorded result code',
 				description: 'Check the job in the console or try again',

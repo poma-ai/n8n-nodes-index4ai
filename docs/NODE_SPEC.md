@@ -1,6 +1,6 @@
 # n8n nodes for index4.ai and PrimeCut: node spec
 
-Linear: POMA-1259 (spec), parent POMA-1258. Status: draft v2.1, 2026-10-26. v1 was reviewed by two independent reviewers (Claude reviewer agent, Gemini 3.1 Pro); v2 applied their findings and went through one re-review round with both; v2.1 applies the re-review findings. Codex was unavailable (MCP connection closed).
+Linear: POMA-1259 (spec), parent POMA-1258. Status: v2.2, 2026-10-26. v1 was reviewed by two independent reviewers (Claude reviewer agent, Gemini 3.1 Pro); v2 applied their findings and went through one re-review round with both; v2.1 applies the re-review findings; v2.2 changes D3 and section 3 to accept account keys as well as project keys, at the owner's request. Codex was unavailable (MCP connection closed).
 
 This document decides what the n8n packages are before any code is written: package layout, credentials, the two nodes and their operations, output shapes, error handling, and the constraints n8n's verification process imposes. The scaffold ticket (POMA-1260) starts from this document.
 
@@ -10,7 +10,7 @@ This document decides what the n8n packages are before any code is written: pack
 |---|----------|--------|-----|
 | D1 | Package layout | **Two packages, one node each: `n8n-nodes-index4ai` and `n8n-nodes-primecut`.** index4.ai ships first. | n8n's verification guideline: "Each package should integrate one third-party service." The products sit on different hosts, have different consoles, and index4.ai product routes require a key for a project with the `grill` product (per the API descriptions; confirmed in V2). To an n8n reviewer and to a user these are two services. Both reviewers flagged the one-package layout as the likeliest rejection. Cost: two repos, two submissions. The ticket's earlier lean ("one package, two nodes") is reversed here; this is the main decision for the ticket owner to confirm. Both npm names were free on 2026-10-26. |
 | D2 | Node style | Programmatic (`execute()`) for both nodes | Needed for binary input (`getBinaryDataBuffer`), joining chunk pages onto chunksets, submit-all-then-poll, and item pairing. Declarative nodes can poll (Firecrawl, which is declarative, polls inside a `postReceive` hook), so polling alone is not the reason. |
-| D3 | Credentials | One credential type per package, **project API keys only in v1** (`poma_proj_…`). No Project ID field. | `GET /projects/info` accepts only project keys and rejects account keys with 401, so it is a reliable test request for project keys and a guaranteed failure for account keys. Account keys plus `X-Project-ID` need an `authenticate` function (a generic headers block cannot omit an empty header) and a different test endpoint; defer to v1.1 if users ask. |
+| D3 | Credentials | One credential type per package accepting **both project API keys and account API keys**: API Key plus an optional Project ID. An `authenticate` function adds `Authorization: Bearer` and sends `X-Project-ID` only when Project ID is set. | Decided 2026-10-26 (v2.2) after the owner asked for account keys. A generic headers block cannot omit an empty header, hence the function. The test request must accept every key kind, so it is `GET /docs?limit=1` (index4.ai) rather than `/projects/info`, which takes project keys only. An account key without Project ID uses the account's default project; `400 no_default_project` and `409 project_id_conflict` get their own messages. |
 | D4 | HTTP | `this.helpers.httpRequestWithAuthentication` only; octet-stream uploads; no multipart | Verified nodes allow no runtime dependencies. Octet-stream ingest takes every option the node exposes as headers. The form route's extra `doc_metadata` field is therefore not exposed in v1. |
 | D5 | Job plumbing | Hidden inside the node. "Wait for Result" on by default with an execution-level timeout. A "Job" resource with "Get Status" (both nodes) and "Get Results" (PrimeCut) for manual control. | Firecrawl exposes the same shape (operation plus wait). |
 | D6 | PrimeCut output | One item per chunkset: `text` plus flat metadata fields, `pairedItem` set | The Vector Store insert path in n8n goes through the Default Data Loader, whose defaults **re-split text at 1000 characters** and ignore input metadata. The output shape therefore only works with the loader configured as in section 4.5; the template ships those settings and the README documents them. This wiring is verified against a real `/results` payload before the shape is frozen (section 8, V1). |
@@ -63,16 +63,17 @@ package.json rules from n8n's verification page: `n8n-nodes-` prefix, keyword, `
 
 | Field | Type | Notes |
 |-------|------|-------|
-| API Key | string, password | A project API key (`poma_proj_…`) from console.index4.ai, for a project with the index4.ai product. Description says exactly that. |
+| API Key | string, password | A project API key (`poma_proj_…`) or an account API key from console.index4.ai. |
+| Project ID | string, optional | With an account key: the project to use, or empty for the account's default index4.ai project. With a project key: leave empty (a different value answers `409 project_id_conflict`). Sent as `X-Project-ID` only when set. |
 | Base URL | hidden, default `https://api.index4.ai/v1` | Hidden. Exists so an on-prem option (POMA-1138) can be added without a node change. |
 
-Authenticate: generic, `Authorization: Bearer {{apiKey}}`. Test: `GET /projects/info` (200 for any project key, 401 otherwise), with a `responseSuccessBody` rule that fails when the returned project's `product` is not `grill`, message "This key belongs to a PrimeCut project. Create an index4.ai project key at console.index4.ai."
+Authenticate: a function (`IAuthenticate`) that sets `Authorization: Bearer <key>` and, when Project ID is non-empty, `X-Project-ID`. Test: `GET /docs?limit=1`, which accepts login tokens, account keys and project keys. A PrimeCut project key, or an account key with no usable project, answers 4xx and fails the test; no body rule is needed.
 
 ### 3.2 `primeCutApi` (display name "PrimeCut API")
 
-Same two fields. Base URL default `https://api.poma-ai.com/v3`. Key from console.poma-ai.com. Test `GET /projects/info` with the mirror rule: fail when `product` is not `primecut`, message naming console.poma-ai.com.
+Same three fields. Base URL default `https://api.poma-ai.com/v3`. Key from console.poma-ai.com. Test: a PrimeCut route that accepts every key kind; confirm which in V2 (`GET /activeJobs` is the candidate).
 
-Keys are per product: index4.ai routes require a project with the `grill` product and PrimeCut routes a `primecut` project. `/projects/info` itself accepts any project key, which is why the product rule exists. The README says which console issues which key.
+Keys are per product: index4.ai routes require a project with the `grill` product and PrimeCut routes a `primecut` project. Protected projects reject account keys by design. The README says which console issues which key.
 
 ## 4. PrimeCut node
 
@@ -257,6 +258,8 @@ Error bodies are usually the JSON envelope `{ error, code, reason }`, but `/jobs
 | 402 | HTTP or job | The account has no credits left for this request | Top up at the console; if `reason` is `legacy_pricing_retired`, switch to the current plan |
 | 403 | HTTP or job (`blocked`) | The request was refused for this project | Check the project's protection settings and that the key belongs to it |
 | 400 | HTTP | The request was rejected: `<message from the response body>` | Check the file name, URL and options |
+| 400 `no_default_project` | HTTP | No project is selected for this account API key | Enter the 'Project ID' in the credential, or set a default project in the console |
+| 409 `project_id_conflict` | HTTP | The 'Project ID' in the credential does not match the project key's project | Clear 'Project ID' when using a project key, or use an account key |
 | 404 | HTTP | The document or job was not found | Check the ID, and that it belongs to this project |
 | 409 | job | The job ended without a recorded result code | Check the job in the console or try again |
 | 413 / 415 / 422 | job | The document could not be processed: too large, unsupported type, or unreadable | Split or convert the document and try again; for index4.ai a 413 after conversion means the indexing capacity was exceeded, so contact support |
@@ -288,7 +291,7 @@ Publish and submit:
 | # | What | Why |
 |---|------|-----|
 | V1 | Run a real PDF through `/primeCut/ingest` and `/results`; confirm chunk and chunkset indices line up, how placeholders appear in text, and that the 4.5 loader settings insert chunksets unsplit into Qdrant | D6 rests on it |
-| V2 | `GET /projects/info` with a project key on both hosts (expect 200 and the `product` field); a PrimeCut key against an index4.ai product route such as `GET /docs` (expect a 4xx) | D3, the credential product rule, README wording |
+| V2 | Credential test (`GET /docs?limit=1`) with a project key, an account key plus Project ID, and an account key without Project ID on an account with and without a default project; a PrimeCut key against `GET /docs` (expect a 4xx); whether `X-Project-ID` is harmless on `/jobs/{id}/status`; which PrimeCut route serves as its credential test | D3, README wording |
 | V3 | Fire `X-Completion` at a Wait node's resume URL; record method and payload | Decides whether a Completion Webhook option can be added after v1 |
 | V4 | Confirm the octet-stream body limit for ingest and state it in the parameter description | User-facing limit |
 | V5 | On n8n 2.x (via `npm run dev`), confirm the index4.ai tool appears in the AI Agent picker without any environment variable; record the minimum n8n version for the README | D7; older versions needed `N8N_COMMUNITY_PACKAGES_ALLOW_TOOL_USAGE=true`, which the current env var docs no longer list |
@@ -300,7 +303,7 @@ Publish and submit:
 |---|------|----------|
 | R1 | Two packages means two repos, two release pipelines, two verification queues | Accept; index4.ai first, PrimeCut follows once the first passes and lessons are applied. Ticket titles that say `n8n-nodes-poma` need renaming. |
 | R2 | Verification queue turnaround is unpublished; a forum thread reports the automated check stalling for days | Plan the launch date after submission. |
-| R3 | Project-keys-only excludes account-key users in v1 | Document; add account key plus Project ID in v1.1 if asked. |
+| R3 | Account keys without a Project ID depend on the account having a default index4.ai project | The `no_default_project` message tells the user what to set. |
 | R4 | Output shape may change after V1 | Do V1 first in POMA-1260, before writing the mapping code. |
 
 ## 10. Reference nodes

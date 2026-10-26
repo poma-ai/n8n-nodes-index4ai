@@ -10,9 +10,14 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Credentials
 
-Create a project API key at [console.index4.ai](https://console.index4.ai) for a project with the index4.ai product, then add an **index4.ai API** credential in n8n and paste the key. Project keys start with `poma_proj_`. The credential test calls `GET /projects/info` and rejects keys that belong to a PrimeCut project.
+Create an API key at [console.index4.ai](https://console.index4.ai), then add an **index4.ai API** credential in n8n:
 
-Account-level keys and the `X-Project-ID` header are not supported in this version.
+| Key kind | API Key | Project ID |
+|----------|---------|------------|
+| Project key (`poma_proj_…`), bound to one project | the key | leave empty |
+| Account key, can address any of your projects | the key | the project to use, or empty for the account's default index4.ai project |
+
+The node sends the key as a Bearer token and, when Project ID is set, an `X-Project-ID` header. The credential test lists one document (`GET /docs?limit=1`), which every key kind can do; a key for a PrimeCut project, or an account key without a usable project, fails the test. Protected projects reject account keys by design, so use a project key there.
 
 ## Operations
 
