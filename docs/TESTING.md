@@ -36,10 +36,18 @@ Setup: `n8nio/n8n:latest` (n8n 3.x) with the built package mounted as a custom e
 
 Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-compose.yml`): n8n registers the node as `CUSTOM.index4Ai`, so the examples' `n8n-nodes-index4ai.index4Ai` type must be replaced with `CUSTOM.index4Ai` before importing. A package installed through Settings > Community Nodes uses the type as shipped. "Import from URL" is fetched by the n8n backend, not the browser, so the URL must be reachable from inside the container.
 
+### Later the same day, same instance
+
+| Check | Result |
+|---|---|
+| Document > Get Many, Return All off, Limit 3, Simplified | 3 items with `doc_id`, `filename`, `chunkset_count`, `ingested_at` (fields the API did not return are absent); n8n shows its own "limit reached" hint |
+| Document > Get via the "From list" picker, Simplified | One item for the picked document |
+| Job > Get Status with the ID of the earlier URL ingest | `{ jobId, docId, status: "done", deduplicated: false }`; a job keeps reporting `done` after its document was deleted |
+| `examples/agent-with-search-tool.json` | Imports cleanly; the index4.ai credential is attached to the tool automatically; not executed yet, the Chat model node needs a provider credential |
+
 ### Not yet covered
 
-- Get, Get Many and the Output modes Raw and Selected Fields in the UI
-- Job > Get Status in the UI
-- A real agent run with a chat model attached (`examples/agent-with-search-tool.json` imports but was not executed)
+- The Output modes Raw and Selected Fields in the UI (exercised by the mock harness only)
+- A real agent run with a chat model attached
 - `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
 - A project API key (only the account key was used)
