@@ -6,7 +6,7 @@ import type {
 	ILoadOptionsFunctions,
 	JsonObject,
 } from 'n8n-workflow';
-import { NodeApiError } from 'n8n-workflow';
+import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 
 export type ApiContext = IExecuteFunctions | ILoadOptionsFunctions;
 
@@ -24,6 +24,8 @@ export interface ApiRequestOptions {
 
 const CREDENTIAL_NAME = 'index4AiApi';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Default pause before retrying after a 429, in seconds. Matches the API's documented default. */
 export const DEFAULT_RETRY_AFTER_SECONDS = 5;
 
@@ -39,8 +41,21 @@ export async function apiRequest(
 	endpoint: string,
 	options: ApiRequestOptions = {},
 ): Promise<ApiResponse> {
-	const credentials = (await this.getCredentials(CREDENTIAL_NAME)) as { baseUrl?: string };
+	const credentials = (await this.getCredentials(CREDENTIAL_NAME)) as {
+		baseUrl?: string;
+		projectId?: string;
+	};
 	const baseUrl = (credentials.baseUrl ?? 'https://api.index4.ai/v1').replace(/\/+$/, '');
+
+	// The API answers a malformed X-Project-ID with a 503 rather than a 400
+	// (observed 2026-10-26), so check the shape here and say what is wrong.
+	const projectId = (credentials.projectId ?? '').trim();
+	if (projectId && !UUID_PATTERN.test(projectId)) {
+		throw new NodeOperationError(this.getNode(), "'Project ID' in the credential is not a UUID", {
+			description:
+				'Copy the project ID from console.index4.ai (36 characters with dashes), or leave it empty',
+		});
+	}
 
 	const requestOptions: IHttpRequestOptions = {
 		method,
