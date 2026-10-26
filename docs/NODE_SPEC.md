@@ -254,7 +254,7 @@ Error bodies are usually the JSON envelope `{ error, code, reason }`, but `/jobs
 
 | Code | Where | Message (what happened) | Description (how to fix) |
 |------|-------|-------------------------|--------------------------|
-| 401 | HTTP | The API key was rejected | Check the key in the credential and that it belongs to this product and is a project key |
+| 401 | HTTP | The API key was rejected | Check the key in the credential, and that its project (or the Project ID) has the index4.ai product |
 | 402 | HTTP or job | The account has no credits left for this request | Top up at the console; if `reason` is `legacy_pricing_retired`, switch to the current plan |
 | 403 | HTTP or job (`blocked`) | The request was refused for this project | Check the project's protection settings and that the key belongs to it |
 | 400 | HTTP | The request was rejected: `<message from the response body>` | Check the file name, URL and options |
