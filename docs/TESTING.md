@@ -44,10 +44,10 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 | Document > Get via the "From list" picker, Simplified | One item for the picked document |
 | Job > Get Status with the ID of the earlier URL ingest | `{ jobId, docId, status: "done", deduplicated: false }`; a job keeps reporting `done` after its document was deleted |
 | `examples/agent-with-search-tool.json` | Imports cleanly; the index4.ai credential is attached to the tool automatically; not executed yet, the Chat model node needs a provider credential |
+| Agent run with a chat model (same day, Google Gemini, in a hand-built workflow with the same tool wiring) | Prompt "What does the Globex demo sales model contain?" with the tool's Query set to Defined by agent: the agent called the model, then the index4.ai Tool once (the top hit was the Globex workbook, rel 1.19), then the model again, and answered in two sentences naming the document. 2,592 tokens, 6.3 s. With a fixed Query the tool still ran but searched the fixed text; with the prompt source left on Connected Chat Trigger Node and no Chat Trigger, the agent fails with "No prompt specified" |
 
 ### Not yet covered
 
 - The Output modes Raw and Selected Fields in the UI (exercised by the mock harness only)
-- A real agent run with a chat model attached
 - `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
 - A project API key (only the account key was used)
