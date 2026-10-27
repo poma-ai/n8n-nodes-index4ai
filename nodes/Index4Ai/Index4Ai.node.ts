@@ -351,7 +351,7 @@ async function buildIngestRequest(
 		const propertyName = this.getNodeParameter('binaryPropertyName', i) as string;
 		const binary = this.helpers.assertBinaryData(i, propertyName);
 		body = await this.helpers.getBinaryDataBuffer(i, propertyName);
-		const fileName = binary.fileName || 'document';
+		const fileName = binaryFileName(binary);
 		label = fileName;
 		// The API infers the format from the file name. The body is always raw bytes;
 		// application/json would be read as a JSON job description instead.
@@ -489,6 +489,35 @@ function parseFilterClauses(this: IExecuteFunctions, value: unknown, i: number):
 		}
 	}
 	return parsed as IDataObject[];
+}
+
+/** The file name as a binary carries it, with the extension added when the name has none: the API infers the format from it. */
+function binaryFileName(binary: { fileName?: string; fileExtension?: string; mimeType?: string }): string {
+	let name = (binary.fileName ?? '').trim() || 'document';
+	if (!/\.[A-Za-z0-9]{1,8}$/.test(name)) {
+		const ext = (binary.fileExtension ?? '').replace(/^\./, '') || extensionFromMime(binary.mimeType);
+		if (ext) name = `${name}.${ext}`;
+	}
+	return name;
+}
+
+function extensionFromMime(mimeType?: string): string {
+	const map: Record<string, string> = {
+		'application/pdf': 'pdf',
+		'text/plain': 'txt',
+		'text/html': 'html',
+		'text/markdown': 'md',
+		'text/csv': 'csv',
+		'image/png': 'png',
+		'image/jpeg': 'jpg',
+		'application/msword': 'doc',
+		'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+		'application/vnd.ms-excel': 'xls',
+		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+		'application/vnd.ms-powerpoint': 'ppt',
+		'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+	};
+	return map[(mimeType ?? '').split(';')[0].trim().toLowerCase()] ?? '';
 }
 
 function splitIds(value: string | undefined): string[] {
