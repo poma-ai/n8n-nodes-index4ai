@@ -46,8 +46,16 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 | `examples/agent-with-search-tool.json` | Imports cleanly; the index4.ai credential is attached to the tool automatically; not executed yet, the Chat model node needs a provider credential |
 | Agent run with a chat model (same day, Google Gemini, in a hand-built workflow with the same tool wiring) | Prompt "What does the Globex demo sales model contain?" with the tool's Query set to Defined by agent: the agent called the model, then the index4.ai Tool once (the top hit was the Globex workbook, rel 1.19), then the model again, and answered in two sentences naming the document. 2,592 tokens, 6.3 s. With a fixed Query the tool still ran but searched the fixed text; with the prompt source left on Connected Chat Trigger Node and no Chat Trigger, the agent fails with "No prompt specified" |
 
+### Output modes in the UI (same day, `local-test/examples/ui-checks.json`)
+
+| Check | Result |
+|---|---|
+| Search, Structured Results, Output Raw, query "Globex demo sales model" | One item with the fields the API returned for it: `doc_id`, `chunkset_index` (-1 for a document-level hit), `content`, `pages`, `chunk_indices`, `score`, `scores`. Fields the API leaves out are not invented |
+| Search, Output Selected Fields = Content, Score | `doc_id`, `content`, `score` only; the ID stays as documented |
+| Document > Get Many, Limit 2, Selected Fields = Title, Pages | Two items with `doc_id` only: these documents have no `title` or `pages` in the API response, so only the ID remains. n8n shows its "Limit of 2 items reached" hint |
+| Document > Get Many, Limit 1, Output Raw | `doc_id`, `filename`, `chunkset_count`, `chunk_count`, `table_count`, `ingested_at`, `source_job_id`, `bm25_state` |
+
 ### Not yet covered
 
-- The Output modes Raw and Selected Fields in the UI (exercised by the mock harness only)
 - `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
 - A project API key (only the account key was used)
