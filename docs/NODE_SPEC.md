@@ -122,7 +122,7 @@ Not exposed in v1: `X-Completion` (the callback's method and payload are not doc
 
 ### 4.3 Output shape (Simplify on, Return = Chunksets)
 
-Field names come from poma-core's chunkset writer (`chunkset_index`, `start_chunk`, `end_chunk`, `depth`, `contents`, `tokens`, `file_id`, `chunks`, `to_embed`) and the chunk writer (`chunk_index`, `parent_chunk_index`, `depth`, `content`, `page`, `title`, `tag`, `lang`).
+Field names as observed in a live `/results` payload on 2026-10-27 (V1, converter `hotfix-v1.1.5`, archive `version: "1.0"`): a chunk has `chunk_index`, `content`, `depth`, `file_id`, `lang`, `lang_confidence`, `page`, `parent_chunk_index`, `to_embed`; a chunkset has `chunkset_index`, `chunks` (the chunk indices it spans), `contents`, `file_id`, `to_embed`. `metadata` has `source_file`, `source_type`, `file_id`, `version`, `chunk_page_numbering` (`original_1based`; a document-level chunk reports page 0). There is no `start_chunk`, `end_chunk`, `tokens` or `title` field. Placeholders stay inline in the text, for example `[IMAGE:Dummy PDF file]`, with the asset in the `images` map keyed `image_00001`.
 
 ```json
 {
@@ -130,16 +130,17 @@ Field names come from poma-core's chunkset writer (`chunkset_index`, `start_chun
   "jobId": "550e…",
   "fileName": "report.pdf",
   "chunksetIndex": 12,
-  "tokens": 812,
+  "firstChunk": 40,
+  "lastChunk": 47,
   "page": 7,
-  "title": "3.2 Liquidity",
+  "heading": "Sample Document Overview",
   "canonicalUrl": "https://…"
 }
 ```
 
-Fields are flat, not nested under `metadata`, because the Default Data Loader maps metadata per key with expressions like `{{ $json.page }}`. `page` and `title` come from the chunk at `start_chunk`. When `to_embed` is present and differs from `contents`, it is added as `embedText` (ninth field; the UX guideline caps Simplify at ten). `fileId`, `startChunk`, `endChunk`, `depth` and `chunks` stay in the raw output only. Every item has `pairedItem: { item: i }`.
+Fields are flat, not nested under `metadata`, because the Default Data Loader maps metadata per key with expressions like `{{ $json.page }}`. `firstChunk` and `lastChunk` are the smallest and largest entry of `chunks`; `page` is the first page greater than 0 among the chunkset's chunks (else 0); `heading` is the content of the shallowest chunk in the set when that chunk is not the only one. When `to_embed` is present and differs from `contents`, it is added as `embedText` (tenth field, the UX cap). `fileId`, `chunks` and the raw `metadata` stay in the raw output only. Every item has `pairedItem: { item: i }`.
 
-Return = Chunks: one item per chunk, `text` = `content`, the chunk's own fields in camelCase, plus `jobId`, `fileName`.
+Return = Chunks: one item per chunk, `text` = `content`, the chunk's own fields in camelCase (`chunkIndex`, `parentChunkIndex`, `depth`, `page`, `lang`), plus `jobId`, `fileName`, and `embedText` when it differs.
 
 `JobResults.skipped_members` non-empty means the payload is incomplete; the node throws ("Results for job … are too large to return inline. Download them from the POMA console or use the archive endpoint.") rather than emitting a partial set.
 
@@ -147,7 +148,7 @@ Placeholders: `JobResults` also carries `tables`, `images` and `code` maps keyed
 
 ### 4.4 Behaviour
 
-1. For each input item: `POST /primeCut/ingest` with the file bytes (or `X-Remote-URL`), `Content-Disposition: attachment; filename="<ascii fallback>"; filename*=UTF-8''<encoded>`, `Content-Type` from the binary MIME type. Response 201 `PublicJob`; the node reads `job_id`, `created_at` and `status.status`.
+1. For each input item: `POST /primeCut/ingest` with the file bytes (or `X-Remote-URL`), `Content-Disposition: attachment; filename="<ascii fallback>"; filename*=UTF-8''<encoded>`, and `Content-Type: application/octet-stream` always (the route reads `application/json` as a JSON job description, and the format comes from the file name; same rule as the index4.ai node). Response 201 `PublicJob`; the node reads `job_id`, `created_at` and `status.status`.
    On `429 too_many_jobs`: wait `Retry-After` seconds (default 5; `sleep` from `n8n-workflow` takes milliseconds, so multiply by 1000) and retry the same item while the deadline allows.
 2. Not waiting: return `{ jobId, status, createdAt }` per item.
 3. Waiting: after all items are submitted, poll `GET /jobs/{id}/status` for the open jobs one at a time in a round every 5 s (first round after 2 s), never in parallel; a 429 on a status call (not documented for this route, handled defensively) waits `Retry-After` seconds before the next call. Terminal states: `done`, `failed`, `blocked`. For PrimeCut, a `done` status without a `download` block means the result is not stored yet; keep polling. Once `download` is present, `GET /jobs/{id}/results` once and map per Return and Simplify.
@@ -260,9 +261,11 @@ Error bodies are usually the JSON envelope `{ error, code, reason }`, but `/jobs
 | 400 | HTTP | The request was rejected: `<message from the response body>` | Check the file name, URL and options |
 | 400 `no_default_project` | HTTP | No project is selected for this account API key | Enter the 'Project ID' in the credential, or set a default project in the console |
 | 409 `project_id_conflict` | HTTP | The 'Project ID' in the credential does not match the project key's project | Clear 'Project ID' when using a project key, or use an account key |
-| 404 | HTTP | The document or job was not found | Check the ID, and that it belongs to this project |
+| 404 | HTTP | The document or job was not found (index4.ai) / The job was not found (PrimeCut) | Check the ID, and that it belongs to this project |
 | 409 | job | The job ended without a recorded result code | Check the job in the console or try again |
-| 413 / 415 / 422 | job | The document could not be processed: too large, unsupported type, or unreadable | Split or convert the document and try again; for index4.ai a 413 after conversion means the indexing capacity was exceeded, so contact support |
+| 413 | job | The document is too large | Split the document and try again; for index4.ai a 413 after conversion means the indexing capacity was exceeded, so contact support |
+| 415 | job | The document type is not supported | Convert the document to a supported format and try again |
+| 422 | job | The document could not be read | Check that the file is not damaged, encrypted or empty |
 | 429 | HTTP | handled by retry; at the deadline: Timed out waiting for a free job slot | Raise 'Timeout (Seconds)' or run fewer executions at once |
 | 5xx | HTTP or job | index4.ai / PrimeCut did not complete the request | Try again later |
 
