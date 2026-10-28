@@ -16,7 +16,12 @@ Create an API key at [console.index4.ai](https://console.index4.ai), then add an
 | Project key (`poma_proj_…`), bound to one project | the key | leave empty |
 | Account key, can address any of your projects | the key | the project to use, or empty for the account's default index4.ai project |
 
-The node sends the key as a Bearer token and, when Project ID is set, an `X-Project-ID` header. The credential test lists one document (`GET /docs?limit=1`), which every key kind can do; a key for a PrimeCut project fails it with "This key is for a different product", an unknown key with "The API key was rejected". The test checks the key only: a wrong Project ID passes it and shows up on the first operation instead (a project key with a Project ID for another project gets "The 'Project ID' in the credential does not match the project key's project"). Protected projects reject account keys by design, so use a project key there.
+The node sends the key as a Bearer token and, when Project ID is set, an `X-Project-ID` header. The credential test lists one document (`GET /docs?limit=1`). What it tells you:
+
+- An unknown or expired key: "The API key was rejected".
+- A key for another POMA product (PrimeCut), or an account key with a Project ID it cannot use: "Refused: the key is for another POMA product, or the Project ID is not a project this key can use".
+- A project key with a Project ID set passes the test even when the ID is another project's; the first operation then fails with "The 'Project ID' in the credential does not match the project key's project". Leave Project ID empty with a project key.
+- Protected projects reject account keys by design, so use a project key there.
 
 ## Operations
 
@@ -61,7 +66,7 @@ Operations that need binary input (Ingest from a file) or that destroy data (Del
 
 ## Compatibility
 
-Works on current n8n releases. Built against n8n-workflow 2.44 on Node 22, with no runtime dependencies.
+Tested on n8n 2.44 (the `n8nio/n8n` image). Built against n8n-workflow 2.44 on Node 22, with no runtime dependencies.
 
 ## Development
 

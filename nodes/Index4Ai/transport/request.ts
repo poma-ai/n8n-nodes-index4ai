@@ -204,6 +204,15 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 						'Use an index4.ai key in this credential: a project key for an index4.ai project, or an account key',
 				};
 			}
+			// Observed 2026-10-28: an account key with a Project ID it cannot use
+			// answers 403 "Project not found or access denied".
+			if (/project not found/i.test(detail)) {
+				return {
+					message: "'Project ID' in the credential is not a project this key can use",
+					description:
+						'Check the ID in the console, or clear it to use the default index4.ai project of the account',
+				};
+			}
 			return {
 				message: 'The request was refused for this project',
 				description: "Check the project's protection settings and that the key belongs to it",
@@ -233,8 +242,8 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 				};
 			}
 			return {
-				message: 'The job ended without a recorded result code',
-				description: 'Check the job in the console or try again',
+				message: 'The request conflicts with the current state',
+				description: 'Check the project and the key in the credential, or the job in the console',
 			};
 		case 413:
 			return {

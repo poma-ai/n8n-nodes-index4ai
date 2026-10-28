@@ -1,8 +1,8 @@
-# Test log
+# Manual test log
 
 ## 2026-10-26: live API and local n8n, account API key
 
-Setup: `n8nio/n8n:latest` (n8n 3.x) with the built package mounted as a custom extension (see `docker-compose.yml`), owner login, one **index4.ai API** credential with an account key and no Project ID.
+Setup: `n8nio/n8n:latest` (n8n 2.44) with the built package mounted as a custom extension (see `docker-compose.yml`), owner login, one **index4.ai API** credential with an account key and no Project ID.
 
 ### Live API (curl, `https://api.index4.ai/v1`)
 
@@ -27,7 +27,7 @@ Setup: `n8nio/n8n:latest` (n8n 3.x) with the built package mounted as a custom e
 | Document > Ingest, URL source, Wait for Indexing on | Finished in about 30 s: `{ jobId, docId, status: "done", deduplicated: false }` |
 | Search in Document, "From list" picker | Picker lists the project's documents and filters by typed text; the new document was searchable |
 | Document > Delete, "From list" picker | `{ "deleted": true }` |
-| AI Agent tool picker (V5) | "index4.ai Tool" listed, no environment variable needed on n8n 3.x |
+| AI Agent tool picker (V5) | "index4.ai Tool" listed, no environment variable needed on n8n 2.44 |
 | Tool description (V6) | n8n shows "Tool Description: Set Automatically" using the node description; Query carries the "let the model fill" control |
 
 ### Example workflows (same day, same instance)
@@ -46,7 +46,7 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 | `examples/agent-with-search-tool.json` | Imports cleanly; the index4.ai credential is attached to the tool automatically; not executed yet, the Chat model node needs a provider credential |
 | Agent run with a chat model (same day, Google Gemini, in a hand-built workflow with the same tool wiring) | Prompt "What does the Globex demo sales model contain?" with the tool's Query set to Defined by agent: the agent called the model, then the index4.ai Tool once (the top hit was the Globex workbook, rel 1.19), then the model again, and answered in two sentences naming the document. 2,592 tokens, 6.3 s. With a fixed Query the tool still ran but searched the fixed text; with the prompt source left on Connected Chat Trigger Node and no Chat Trigger, the agent fails with "No prompt specified" |
 
-### Output modes in the UI (same day, `local-test/examples/ui-checks.json`)
+### Output modes in the UI (same day, a check workflow with one branch per mode)
 
 | Check | Result |
 |---|---|
@@ -59,7 +59,7 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 
 | Check | Result |
 |---|---|
-| A PrimeCut project key on `GET /docs?limit=1` (the credential test request) | 403 `{"code":403,"error":"API key not valid for this product"}`. In the UI the credential test first showed n8n's generic "Couldn't connect with these settings: Forbidden"; with the `rules` added the same day it shows "This key is for a different product. Use an index4.ai key: a project key for an index4.ai project, or an account key." (checked in the UI). The node's 403 mapping recognises the same text ("The API key is for a different product") |
+| A PrimeCut project key on `GET /docs?limit=1` (the credential test request) | 403 `{"code":403,"error":"API key not valid for this product"}`. An account key with a random Project ID on the same route: 403 `{"code":403,"error":"Project not found or access denied","reason":"forbidden"}`, so the credential-test rule for 403 names both causes and the node maps each text to its own message. In the UI the credential test first showed n8n's generic "Couldn't connect with these settings: Forbidden"; with the `rules` added the same day it shows "This key is for a different product. Use an index4.ai key: a project key for an index4.ai project, or an account key." (checked in the UI). The node's 403 mapping recognises the same text ("The API key is for a different product") |
 | An invalid key on the credential test (UI, build with the rules) | "The API key was rejected. Check it in the console." |
 
 ### Not yet covered
