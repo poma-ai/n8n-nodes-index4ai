@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- A Timeout expression that is not a number falls back to the default instead of polling without pause.
+- A failed job with code 401, 404 or 429 reports a document problem rather than a request problem, with the API detail.
+
 ## 0.1.1 (2026-10-28)
 
 - Published through npm trusted publishing (GitHub Actions OIDC) instead of an access token. No functional changes.

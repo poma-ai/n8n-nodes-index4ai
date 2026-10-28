@@ -193,8 +193,7 @@ export class Index4Ai implements INodeType {
 
 				if (resource === 'document' && operation === 'ingest') {
 					const wait = this.getNodeParameter('wait', i) as boolean;
-					const timeout = this.getNodeParameter('timeout', i) as number;
-					if (deadline === 0) deadline = Date.now() + Math.max(1, timeout) * 1000;
+					if (deadline === 0) deadline = Date.now() + timeoutSeconds(this.getNodeParameter('timeout', i, 600)) * 1000;
 
 					const { label, ...request } = await buildIngestRequest.call(this, i);
 					const response = await submitWithPacing.call(
@@ -525,4 +524,14 @@ function splitIds(value: string | undefined): string[] {
 		.split(',')
 		.map((id) => id.trim())
 		.filter((id) => id.length > 0);
+}
+
+/**
+ * The timeout as a positive number of seconds. An expression that yields
+ * nothing or text falls back to the default instead of a NaN deadline, which
+ * would make polling spin without pause.
+ */
+function timeoutSeconds(raw: unknown): number {
+	const seconds = Number(raw);
+	return Number.isFinite(seconds) && seconds > 0 ? seconds : 600;
 }
