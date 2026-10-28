@@ -1,6 +1,6 @@
 {
   "name": "@poma-ai/n8n-nodes-index4ai",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "n8n community node for index4.ai: ingest documents and search them for RAG and AI agents",
   "license": "MIT",
   "homepage": "https://index4.ai",
