@@ -55,7 +55,14 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 | Document > Get Many, Limit 2, Selected Fields = Title, Pages | Two items with `doc_id` only: these documents have no `title` or `pages` in the API response, so only the ID remains. n8n shows its "Limit of 2 items reached" hint |
 | Document > Get Many, Limit 1, Output Raw | `doc_id`, `filename`, `chunkset_count`, `chunk_count`, `table_count`, `ingested_at`, `source_job_id`, `bm25_state` |
 
+### Wrong-product key (2026-10-28)
+
+| Check | Result |
+|---|---|
+| A PrimeCut project key on `GET /docs?limit=1` (the credential test request) | 403 `{"code":403,"error":"API key not valid for this product"}`. In the UI (build without the rules) the credential test showed n8n's generic "Couldn't connect with these settings: Forbidden". The node's 403 mapping now recognises that text ("The API key is for a different product") and the credential test has a `rules` entry so n8n shows that reason instead |
+
 ### Not yet covered
 
 - `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
-- A project API key (only the account key was used)
+- An index4.ai project key (only the account key was used; the PrimeCut project key confirmed the wrong-product path)
+- The credential-test `rules` messages in the UI (the build in the test instance predates them)

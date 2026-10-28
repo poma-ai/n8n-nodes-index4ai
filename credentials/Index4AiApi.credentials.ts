@@ -67,8 +67,9 @@ export class Index4AiApi implements ICredentialType {
 	};
 
 	// GET /docs accepts login tokens, account keys and project keys, so one
-	// request tests every key kind. A key for a PrimeCut project, or an
-	// account key without a usable project, answers 4xx and fails the test.
+	// request tests every key kind. A key for a PrimeCut project answers 403
+	// "API key not valid for this product" (observed 2026-10-28); an unknown
+	// key answers 401; an account key without a usable project answers 400.
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.baseUrl}}',
@@ -76,5 +77,18 @@ export class Index4AiApi implements ICredentialType {
 			method: 'GET',
 			qs: { limit: 1 },
 		},
+		rules: [
+			{
+				type: 'responseCode',
+				properties: {
+					value: 403,
+					message: 'This key is for a different product. Use an index4.ai key: a project key for an index4.ai project, or an account key.',
+				},
+			},
+			{
+				type: 'responseCode',
+				properties: { value: 401, message: 'The API key was rejected. Check it in the console.' },
+			},
+		],
 	};
 }

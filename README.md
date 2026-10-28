@@ -16,7 +16,7 @@ Create an API key at [console.index4.ai](https://console.index4.ai), then add an
 | Project key (`poma_proj_…`), bound to one project | the key | leave empty |
 | Account key, can address any of your projects | the key | the project to use, or empty for the account's default index4.ai project |
 
-The node sends the key as a Bearer token and, when Project ID is set, an `X-Project-ID` header. The credential test lists one document (`GET /docs?limit=1`), which every key kind can do; a key for a PrimeCut project, or an account key without a usable project, fails the test. Protected projects reject account keys by design, so use a project key there.
+The node sends the key as a Bearer token and, when Project ID is set, an `X-Project-ID` header. The credential test lists one document (`GET /docs?limit=1`), which every key kind can do; a key for a PrimeCut project fails it with "This key is for a different product", an unknown key with "The API key was rejected". The test checks the key only: a wrong Project ID passes it and shows up on the first operation instead (a project key with a Project ID for another project gets "The 'Project ID' in the credential does not match the project key's project"). Protected projects reject account keys by design, so use a project key there.
 
 ## Operations
 

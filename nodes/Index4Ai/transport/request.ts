@@ -195,6 +195,15 @@ export function mapErrorCode(code: number, detail: string, reason?: string): Map
 				description: 'Top up credits at console.index4.ai',
 			};
 		case 403:
+			// Observed 2026-10-28: a key for the other POMA product answers
+			// 403 "API key not valid for this product".
+			if (/not valid for this product/i.test(`${detail} ${reason ?? ''}`)) {
+				return {
+					message: 'The API key is for a different product',
+					description:
+						'Use an index4.ai key in this credential: a project key for an index4.ai project, or an account key',
+				};
+			}
 			return {
 				message: 'The request was refused for this project',
 				description: "Check the project's protection settings and that the key belongs to it",
