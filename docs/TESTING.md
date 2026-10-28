@@ -59,10 +59,10 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 
 | Check | Result |
 |---|---|
-| A PrimeCut project key on `GET /docs?limit=1` (the credential test request) | 403 `{"code":403,"error":"API key not valid for this product"}`. In the UI (build without the rules) the credential test showed n8n's generic "Couldn't connect with these settings: Forbidden". The node's 403 mapping now recognises that text ("The API key is for a different product") and the credential test has a `rules` entry so n8n shows that reason instead |
+| A PrimeCut project key on `GET /docs?limit=1` (the credential test request) | 403 `{"code":403,"error":"API key not valid for this product"}`. In the UI the credential test first showed n8n's generic "Couldn't connect with these settings: Forbidden"; with the `rules` added the same day it shows "This key is for a different product. Use an index4.ai key: a project key for an index4.ai project, or an account key." (checked in the UI). The node's 403 mapping recognises the same text ("The API key is for a different product") |
+| An invalid key on the credential test (UI, build with the rules) | "The API key was rejected. Check it in the console." |
 
 ### Not yet covered
 
 - `examples/ingest-url-then-search.json` as an import (the same steps were run by hand earlier)
 - An index4.ai project key (only the account key was used; the PrimeCut project key confirmed the wrong-product path)
-- The credential-test `rules` messages in the UI (the build in the test instance predates them)
