@@ -75,3 +75,7 @@ Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-comp
 - Clean folder, Node 22: `npm install @poma-ai/n8n-nodes-index4ai n8n-workflow`; the node and credential classes load (`index4Ai` v1, `usableAsTool: true`, credential `index4AiApi`); 36 files.
 - Fresh `n8nio/n8n:2.44.7` container, no custom extensions: Settings > Community Nodes > Install with the package name installed v0.1.0 in a few seconds ("Community package installed" in the log); n8n's installer added no peer dependencies to `~/.n8n/nodes`. Import from URL with `https://raw.githubusercontent.com/poma-ai/n8n-nodes-index4ai/main/examples/ingest-url-then-search.json` resolved both nodes to the installed type. With an index4.ai credential added in the UI, Execute ran green: Ingest returned `status: done, deduplicated: true` with a `docId`; Search in document returned one result with the document's `<context>` block, `result_count: 1`, `tokens_estimated: 40`.
 - Note: a bare `npm install @poma-ai/n8n-nodes-index4ai` inside the n8n image (Node 26) fails while building `isolated-vm`, pulled in through the `n8n-workflow` peer dependency. n8n's own installer does not install peers, so this does not affect users.
+
+## 0.1.1, 2026-10-28
+
+Publishing-path release: `@poma-ai/n8n-nodes-index4ai@0.1.1` published by `publish.yml` from tag `0.1.1` through npm trusted publishing (GitHub Actions OIDC, no `NPM_TOKEN` in the repository). Provenance signed and logged; no code changes since 0.1.0.
