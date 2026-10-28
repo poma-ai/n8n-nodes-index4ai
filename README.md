@@ -2,7 +2,6 @@
 
 An [n8n](https://n8n.io) community node for [index4.ai](https://index4.ai), the hosted retrieval layer from POMA AI. Ingest documents, and let workflows and AI Agents search them with hybrid retrieval that returns prompt-ready context.
 
-The node is built to n8n's verified community node rules: no runtime dependencies, programmatic style, published from GitHub Actions with npm provenance.
 
 ## Installation
 
@@ -62,7 +61,7 @@ Operations that need binary input (Ingest from a file) or that destroy data (Del
 
 ## Compatibility
 
-Built against n8n-workflow 2.44 on Node 22. The compiled files were loaded against the n8n-workflow bundled in the current `n8nio/n8n` image to check compatibility; the nodes-panel check on a running instance is part of the release checklist. The scaffold's `npm run dev` command starts n8n 3.x in a container for manual testing.
+Works on current n8n releases. Built against n8n-workflow 2.44 on Node 22, with no runtime dependencies.
 
 ## Development
 
@@ -74,13 +73,13 @@ npm run build
 npm run dev        # n8n in Docker with this node loaded, http://localhost:5678
 ```
 
-The CLI's native dependency does not build on Node 25, so use the pinned version.
+Use the pinned Node version: the CLI's native dependency does not build on Node 25.
 
-`docker compose up` starts a plain n8n container with the built `dist/` mounted as a custom extension at http://localhost:5678, for testing the package the way a self-hosted user would load it.
+`docker compose up` starts a plain n8n container at http://localhost:5678 with the built `dist/` mounted as a custom extension, the way a self-hosted instance loads the package.
 
 ## Release
 
-Releases are published by `.github/workflows/publish.yml` on a version tag, with an npm provenance statement, as n8n requires for verified community nodes since May 2026. Run `npm run release` to lint, build, bump, tag and push.
+A version tag triggers `.github/workflows/publish.yml`, which builds the package and publishes it to npm with a provenance statement. `npm run release` lints, builds, bumps the version, tags and pushes.
 
 ## Resources
 
