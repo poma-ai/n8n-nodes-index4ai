@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-index4ai.index4Ai",
+	"node": "@poma-ai/n8n-nodes-index4ai.index4Ai",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Data & Storage", "Development"],

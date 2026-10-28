@@ -1,11 +1,11 @@
-# n8n-nodes-index4ai
+# @poma-ai/n8n-nodes-index4ai
 
 An [n8n](https://n8n.io) community node for [index4.ai](https://index4.ai), the hosted retrieval layer from POMA AI. Ingest documents, and let workflows and AI Agents search them with hybrid retrieval that returns prompt-ready context.
 
 
 ## Installation
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n docs. The package name is `n8n-nodes-index4ai`.
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n docs. The package name is `@poma-ai/n8n-nodes-index4ai`.
 
 ## Credentials
 

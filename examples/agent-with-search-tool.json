@@ -39,7 +39,7 @@
         "searchOptions": {}
       },
       "name": "index4.ai Tool",
-      "type": "n8n-nodes-index4ai.index4AiTool",
+      "type": "@poma-ai/n8n-nodes-index4ai.index4AiTool",
       "typeVersion": 1,
       "position": [400, 220]
     },

@@ -37,7 +37,7 @@
         }
       },
       "name": "Ingest document",
-      "type": "n8n-nodes-index4ai.index4Ai",
+      "type": "@poma-ai/n8n-nodes-index4ai.index4Ai",
       "typeVersion": 1,
       "position": [480, 0]
     },

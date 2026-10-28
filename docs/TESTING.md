@@ -34,7 +34,7 @@ Setup: `n8nio/n8n:latest` (n8n 2.44) with the built package mounted as a custom 
 
 `examples/ingest-binary-file.json` imported via **Import from URL** and executed: HTTP Request downloaded `dummy.pdf` (13.3 kB, `application/pdf`), Ingest read it from the `data` binary field with `Attributes` `{"source": "n8n_example"}`, waited, and returned `status: done`. `GET /docs/{docId}` showed `attributes: {"source": "n8n_example"}`; the document was then deleted and answers 404.
 
-Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-compose.yml`): n8n registers the node as `CUSTOM.index4Ai`, so the examples' `n8n-nodes-index4ai.index4Ai` type must be replaced with `CUSTOM.index4Ai` before importing. A package installed through Settings > Community Nodes uses the type as shipped. "Import from URL" is fetched by the n8n backend, not the browser, so the URL must be reachable from inside the container.
+Note for a custom-extension install (`N8N_CUSTOM_EXTENSIONS`, as in `docker-compose.yml`): n8n registers the node as `CUSTOM.index4Ai`, so the examples' `@poma-ai/n8n-nodes-index4ai.index4Ai` type must be replaced with `CUSTOM.index4Ai` before importing. A package installed through Settings > Community Nodes uses the type as shipped. "Import from URL" is fetched by the n8n backend, not the browser, so the URL must be reachable from inside the container.
 
 ### Later the same day, same instance
 
