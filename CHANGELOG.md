@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.2 (2026-10-29)
 
 - A Timeout expression that is not a number falls back to the default instead of polling without pause.
 - A failed job with code 401, 404 or 429 reports a document problem rather than a request problem, with the API detail.
